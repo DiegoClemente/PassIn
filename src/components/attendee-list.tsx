@@ -63,6 +63,7 @@ export function AttendeeList(){
             .then((data) => {
                 setAttendees(data.attendees);
                 setTotal(data.total);
+                total.toString(0)
         });
     }, [page, search]);
 
