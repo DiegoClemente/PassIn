@@ -20,70 +20,63 @@ interface Attendee {
     checkedInAt: string | null
 }
 
-
-export function AttendeeList(){
-
+export function AttendeeList() {
     const [search, setSearch] = useState(() => {
         const url = new URL(window.location.toString());
-    
-        if (url.searchParams.has("search")) {
-            return url.searchParams.get("search") ?? "";
-          }
-
-        return "";
+        return url.searchParams.get("search") ?? "";
     });
+
     const [page, setPage] = useState(() => {
         const url = new URL(window.location.toString());
-    
-        if (url.searchParams.has("page")) {
-          return Number(url.searchParams.get("page"));
-        }
-    
-        return 1;
+        return Number(url.searchParams.get("page") ?? 1);
     });
 
-    const [total, setTotal] = useState(0)
-    const [attendees, setAttendees] = useState<Attendee[]>([])
+    const [total, setTotal] = useState(0);
+    const [attendees, setAttendees] = useState<Attendee[]>([]);
+    const [error, setError] = useState<string | null>(null);
 
-    const totalPages = Math.ceil(attendees.length / 10)
+    const totalPages = Math.ceil(total / 10);
 
     useEffect(() => {
         const url = new URL(
-            'http://nlw_unit_2024.railway.internal:8080/events/attendees/e9d4172b-7254-40c9-928a-6af5455fdd46'
+            'https://nlwunit2024-production.up.railway.app/events/attendees/264d0ff8-325b-439d-93a8-e433594e4606'
         );
 
-        url.searchParams.set('pageIndex', String(page - 1))
+        url.searchParams.set('pageIndex', String(page - 1));
 
         if (search.length > 1) {
             url.searchParams.set("query", search);
         }
-        
-        fetch(url)
-            .then((response) => response.json())
+
+        fetch(url.toString())
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
             .then((data) => {
                 setAttendees(data.attendees);
                 setTotal(data.total);
-                total.toString(0)
-        });
+                setError(null);
+            })
+            .catch((error) => {
+                console.error('There was a problem with the fetch operation:', error);
+                setError('Failed to fetch attendees. Please try again later.');
+            });
     }, [page, search]);
 
     function setCurrentSearch(search: string) {
         const url = new URL(window.location.toString());
-    
         url.searchParams.set("search", search);
-    
         window.history.pushState({}, "", url);
-    
         setSearch(search);
     };
 
     function setCurrentPage(page: number) {
         const url = new URL(window.location.toString());
-    
         url.searchParams.set("page", String(page));
-    
         window.history.pushState({}, "", url);
-    
         setPage(page);
     };
 
@@ -119,6 +112,7 @@ export function AttendeeList(){
                     />
                 </div>
             </div>
+            {error && <div className="text-red-500">{error}</div>}
             <Table>
                 <thead>
                     <tr className='border-b border-white/10'>
@@ -136,9 +130,9 @@ export function AttendeeList(){
                     {attendees
                     .filter((attendee) => 
                         attendee.name.toLowerCase().includes(search.toLowerCase())
-                )
-                .slice((page - 1) * 10, page * 10)
-                .map((attendee) => {
+                    )
+                    .slice((page - 1) * 10, page * 10)
+                    .map((attendee) => {
                         return (
                             <TableRow key={attendee.id} className='border-b border-white/10 hover:bg-white/5'>
                                 <TableCell>
@@ -147,8 +141,8 @@ export function AttendeeList(){
                                 <TableCell>{attendee.id}</TableCell>
                                 <TableCell>
                                     <div className='flex flex-col gap-1'>
-                                            <span className='font-semibold text-white'>{attendee.name}</span>
-                                            <span>{attendee.email}</span>
+                                        <span className='font-semibold text-white'>{attendee.name}</span>
+                                        <span>{attendee.email}</span>
                                     </div>
                                 </TableCell>
                                 <TableCell>{dayjs().to(attendee.createdAt)}</TableCell>
@@ -169,12 +163,11 @@ export function AttendeeList(){
                 <tfoot>
                     <tr>
                         <TableCell colSpan={3}>
-                            Mostrando 10 de {attendees.length} itens
+                            Mostrando {attendees.length} de {total} itens
                         </TableCell>
                         <TableCell className='text-right' colSpan={3}>
                             <div className='inline-flex items-center gap-8'>
                                 <span>Pagina {page} de {totalPages}</span>
-                                    
                                 <div className='flex gap-1.5'>
                                     <IconButton onClick={goToFirstPage} disabled={page === 1}>
                                         <ChevronsLeft className='size-4'/>
