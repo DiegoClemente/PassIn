@@ -49,7 +49,7 @@ export function AttendeeList(){
 
     useEffect(() => {
         const url = new URL(
-            'http://localhost:8080/events/attendees/e9d4172b-7254-40c9-928a-6af5455fdd46'
+            'http://nlw_unit_2024.railway.internal:8080/events/attendees/e9d4172b-7254-40c9-928a-6af5455fdd46'
         );
 
         url.searchParams.set('pageIndex', String(page - 1))
