@@ -39,7 +39,7 @@ export function AttendeeList() {
 
     useEffect(() => {
         const url = new URL(
-            'https://cors-anywhere1234-7331bb2c58b7.herokuapp.com/https://nlwunit2024-production.up.railway.app/events/attendees/264d0ff8-325b-439d-93a8-e433594e4606'
+            'https://cors-anywhere1234-7331bb2c58b7.herokuapp.com/https://chimerical-moonbeam-7a10c8.netlify.app/'
         );
 
         url.searchParams.set('pageIndex', String(page - 1));
